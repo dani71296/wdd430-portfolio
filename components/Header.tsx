@@ -31,6 +31,15 @@ export default function Header() {
                                 About
                             </Link>
                         </li>
+
+                        <li>
+                            <Link
+                                href="/projects"
+                                className="text-slate-300 hover:text-sky-400 transition-colors"
+                            >
+                                Projects
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
 
