@@ -1,33 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getProjectById } from "@/lib/projects-db";
+import { NextResponse } from 'next/server';
+import { getProjectById } from '@/lib/projects-db';
 
 export async function GET(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    _request: Request,
+    { params }: { params: { id: string } }
 ) {
-    // 1. Obtenemos el parámetro 'id' de la URL
-    const { id } = await params;
-    const numericId = Number(id);
-
-    // 2. Validación: Si el ID no es un número válido (ej. "abc")
-    if (isNaN(numericId)) {
-        return NextResponse.json(
-            { error: "Invalid ID format. Must be a number." },
-            { status: 400 }
-        );
+    const id = Number(params.id);
+    if (Number.isNaN(id)) {
+        return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
     }
-
-    // 3. Buscar el proyecto en la base de datos
-    const project = getProjectById(numericId);
-
-    // 4. Validación: Si no se encontró el proyecto con ese ID
+    const project = await getProjectById(id);
     if (!project) {
-        return NextResponse.json(
-            { error: "Project not found." },
-            { status: 404 }
-        );
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-
-    // 5. Si todo está bien, devolvemos el proyecto
     return NextResponse.json(project);
 }
