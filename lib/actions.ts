@@ -30,7 +30,7 @@ export type State = {
     message?: string | null;
 };
 
-// CAMBIO AQUÍ: Devuelve Promise<State> en lugar de Promise<State | void>
+// Devuelve Promise<State> en lugar de Promise<State | void>
 export async function createProject(prevState: State, formData: FormData): Promise<State> {
     const raw = {
         title: formData.get('title'),
@@ -54,9 +54,9 @@ export async function createProject(prevState: State, formData: FormData): Promi
 
     try {
         await sql`
-      INSERT INTO projects (title, description, technologies, type, year_completed)
-      VALUES (${title}, ${description}, ${techArray}, ${type}, ${yearCompleted})
-    `;
+            INSERT INTO projects (title, description, technologies, type, year_completed)
+            VALUES (${title}, ${description}, ${techArray}, ${type}, ${yearCompleted})
+        `;
     } catch {
         return {
             message: 'Database Error: Failed to create project.',
@@ -66,7 +66,49 @@ export async function createProject(prevState: State, formData: FormData): Promi
     revalidatePath('/projects');
     redirect('/projects');
 }
+
 export async function deleteProject(id: number) {
     await sql`DELETE FROM projects WHERE id = ${id}`;
     revalidatePath('/projects');
+}
+
+export async function updateProject(id: string, formData: FormData) {
+    const raw = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        technologies: formData.get('technologies'),
+        type: formData.get('type') || 'school',
+        yearCompleted: formData.get('yearCompleted') || currentYear,
+    };
+
+    const parsed = ProjectFormSchema.safeParse(raw);
+
+    if (!parsed.success) {
+        return {
+            errors: parsed.error.flatten().fieldErrors,
+            message: 'Missing or invalid fields. Failed to update project.',
+        };
+    }
+
+    const { title, description, technologies, type, yearCompleted } = parsed.data;
+    const techArray = `{${technologies.split(',').map((t) => t.trim()).join(',')}}`;
+
+    try {
+        await sql`
+            UPDATE projects
+            SET title = ${title},
+                description = ${description},
+                technologies = ${techArray},
+                type = ${type},
+                year_completed = ${yearCompleted}
+            WHERE id = ${Number(id)}
+        `;
+    } catch {
+        return {
+            message: 'Database Error: Failed to update project.',
+        };
+    }
+
+    revalidatePath('/projects');
+    redirect('/projects');
 }
