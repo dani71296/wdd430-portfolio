@@ -39,7 +39,7 @@ export default async function ProjectsPage(props: {
                 {projects.length === 0 ? (
                     <p className="text-gray-500 italic">No se encontraron proyectos.</p>
                 ) : (
-                    projects.map((project: any) => {
+                        projects.map((project) => {
                         // Vinculamos la Server Action de eliminar con el ID del proyecto
                         const deleteProjectWithId = deleteProject.bind(null, project.id);
 
