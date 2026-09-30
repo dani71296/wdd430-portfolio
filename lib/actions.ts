@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth'
+import { auth } from '@/auth';
 
 const currentYear = new Date().getFullYear();
 
@@ -32,6 +35,7 @@ export type State = {
 
 // Devuelve Promise<State> en lugar de Promise<State | void>
 export async function createProject(prevState: State, formData: FormData): Promise<State> {
+    await requireOwnerSession();
     const raw = {
         title: formData.get('title'),
         description: formData.get('description'),
@@ -112,3 +116,29 @@ export async function updateProject(id: string, formData: FormData) {
     revalidatePath('/projects');
     redirect('/projects');
 }
+export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('credentials', formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid email or password.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+        throw error; // Re-lanza el error para que Next.js maneje las redirecciones correctamente
+    }
+}
+async function requireOwnerSession() {
+    const session = await auth();
+    if (!session?.user) {
+        redirect('/login'); // Redirige al login si no está autenticado
+    }
+    return session;
+}
+

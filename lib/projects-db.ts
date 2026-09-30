@@ -65,3 +65,19 @@ export async function getProjectById(id: number): Promise<Project | null> {
   `;
     return rows[0] ?? null;
 }
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    passwordHash: string;
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+    try {
+        const { rows } = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+        return rows[0] ?? null;
+    } catch (error) {
+        console.error('Failed to fetch user:', error);
+        throw new Error('Failed to fetch user.');
+    }
+}

@@ -11,6 +11,7 @@ export default function NavLinks() {
         { href: "/about", label: "About" },
         { href: "/projects", label: "Projects" },
         { href: "/contact", label: "Contact" },
+        { href: "/login", label: "Login" },
     ];
 
     return (
@@ -24,8 +25,8 @@ export default function NavLinks() {
                             href={link.href}
                             aria-current={isActive ? "page" : undefined}
                             className={`transition-colors ${isActive
-                                    ? "text-sky-400 font-semibold"
-                                    : "text-slate-300 hover:text-sky-400"
+                                ? "text-sky-400 font-semibold"
+                                : "text-slate-300 hover:text-sky-400"
                                 }`}
                         >
                             {link.label}
