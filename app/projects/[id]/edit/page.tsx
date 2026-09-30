@@ -1,7 +1,4 @@
 import { updateProject } from '@/lib/actions';
-
-// Ajusta este import según dónde tengas la función para consultar un proyecto por ID
-// por ejemplo desde '@/lib/projects-db'
 import { getProjectById } from '@/lib/projects-db';
 
 export default async function EditProjectPage(props: {
@@ -17,14 +14,17 @@ export default async function EditProjectPage(props: {
         return <div className="p-6">Proyecto no encontrado.</div>;
     }
 
-    // Vinculamos el ID a la Server Action updateProject usando .bind
-    const updateProjectWithId = updateProject.bind(null, id);
+    // Acción de servidor interna que satisface el tipo de retorno void de TypeScript
+    async function handleUpdate(formData: FormData) {
+        'use server';
+        await updateProject(id, formData);
+    }
 
     return (
         <div className="max-w-2xl mx-auto p-6">
             <h1 className="text-2xl font-bold mb-6">Editar Proyecto</h1>
 
-            <form action={updateProjectWithId} className="flex flex-col gap-4">
+            <form action={handleUpdate} className="flex flex-col gap-4">
                 <div>
                     <label htmlFor="title" className="block text-sm font-medium mb-1">
                         Título
